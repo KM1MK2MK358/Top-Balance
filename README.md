@@ -16,8 +16,11 @@ Curious who's loaded or totally broke? TopBalance shows the full wealth map with
 - Aternos support
 
 ## Installation
-To make the script work, follow these steps:
+**To make the script work, follow these steps:**
 
   1 - Place `script.sk` inside: `Skript/scripts/`
 
   2 - Then place `search_baltop.yml` inside: `CommandPanels/panels/`
+
+## Compatibility
+Fully compatible with both Java and Bedrock editions.

@@ -18,5 +18,6 @@ Curious who's loaded or totally broke? TopBalance shows the full wealth map with
 ## Installation
 To make the script work, follow these steps:
 
-1 - Place `script.sk` inside: `Skript/scripts/`
-2 - Then place `search_baltop.yml` inside: `CommandPanels/panels/`
+  1 - Place `script.sk` inside: `Skript/scripts/`
+
+  2 - Then place `search_baltop.yml` inside: `CommandPanels/panels/`

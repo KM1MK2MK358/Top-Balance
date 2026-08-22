@@ -7,3 +7,15 @@ Curious who's loaded or totally broke? TopBalance shows the full wealth map with
 - [Skript](https://modrinth.com/plugin/skript) - For running the script.
 - [CommandPanels](https://commandpanels.net/home) - For creating the UI dialogs.
 - [Vault](https://www.spigotmc.org/resources/vault.34315/) - For managing the economy.
+
+## Features
+- A beautifully designed interface.
+- Dialog support in the search system.
+- A filtering system with 6 different filters.
+- Sound effects that add a pleasant and polished touch
+- Aternos support
+
+## Installation
+To make the script work, follow these steps:
+1 - Place `script.sk` inside: `Skript/scripts/`
+2 - Then place `search_baltop.yml` inside: `CommandPanels/panels/`

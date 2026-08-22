@@ -1,0 +1,213 @@
+#Made by Kouro
+
+#Main Code >>>>>>>>
+#Inside Skript/scripts
+
+command /baltop [<text>] [<text>]:
+    description: View the top balances of all players.
+    executable by: players
+    trigger:
+        if arg-1 is "search":
+            if arg-2 is set:
+                set {search::%uuid of player%::result} to arg-2           
+                loadPlayers(player, "&6Search", false)
+            stop
+        set {sortMode::%uuid of player%} to "richest"
+        loadPlayers(player, "&aᴛᴏᴘ ʙᴀʟ", true)
+
+on inventory click:
+    if name of event-inventory contains "&aᴛᴏᴘ ʙᴀʟ - ᴘᴀɢᴇ ":
+        cancel event
+        set {_page} to name of event-inventory parsed as "&aᴛᴏᴘ ʙᴀʟ - ᴘᴀɢᴇ %integer%"
+        if custom model data of event-slot is 100002:
+            add 1 to {_page}
+            CreatePage(player, "&aᴛᴏᴘ ʙᴀʟ", "&7 ᴍᴏɴᴇʏ", {result::%uuid of player%::*}, {_page}, true, {sortMode::%uuid of player%})
+            play sound "minecraft:item.book.page_turn" with volume 1 to player
+        else if custom model data of event-slot is 100001:
+            remove 1 from {_page}
+            CreatePage(player, "&aᴛᴏᴘ ʙᴀʟ", "&7 ᴍᴏɴᴇʏ", {result::%uuid of player%::*}, {_page}, true, {sortMode::%uuid of player%})
+            play sound "minecraft:item.book.page_turn" with volume 1 to player
+        else if custom model data of event-slot is 100003:
+            close player's inventory
+            play sound "minecraft:block.dispenser.dispense" with volume 1 to player
+            execute console command "pa open search_baltop %player%"
+        else if custom model data of event-slot is 100000:
+            loadPlayers(player, "&aᴛᴏᴘ ʙᴀʟ", true)
+            play sound "minecraft:ui.cartography_table.take_result" with volume 1 to player
+        else if custom model data of event-slot is 100005:
+            set {sortMode::%uuid of player%} to nextSortMode({sortMode::%uuid of player%})
+
+            CreatePage(player, "&aᴛᴏᴘ ʙᴀʟ", "&7 ᴍᴏɴᴇʏ", {result::%uuid of player%::*}, {_page}, true, {sortMode::%uuid of player%})
+            play sound "minecraft:block.dispenser.dispense" with volume 1 to player
+    else if name of event-inventory contains "&6Search - ᴘᴀɢᴇ ":
+        cancel event
+        set {_page} to name of event-inventory parsed as "&6Search - ᴘᴀɢᴇ %integer%"
+        if custom model data of event-slot is 100002:
+            add 1 to {_page}
+            CreatePage(player, "&6Search", "&7 ᴍᴏɴᴇʏ", {result::%uuid of player%::*}, {_page}, false, {sortMode::%uuid of player%})
+            play sound "minecraft:item.book.page_turn" with volume 1 to player
+        else if custom model data of event-slot is 100001:
+            remove 1 from {_page}
+            CreatePage(player, "&6Search", "&7 ᴍᴏɴᴇʏ", {result::%uuid of player%::*}, {_page}, false, {sortMode::%uuid of player%})
+            play sound "minecraft:item.book.page_turn" with volume 1 to player
+        else if custom model data of event-slot is 100004:
+            execute player command "/baltop"
+            play sound "minecraft:block.dispenser.dispense" with volume 1 to player
+        else if custom model data of event-slot is 100000:
+            loadPlayers(player, "&6Search", false)
+            play sound "minecraft:ui.cartography_table.take_result" with volume 1 to player
+        else if custom model data of event-slot is 100005:
+            set {sortMode::%uuid of player%} to nextSortMode({sortMode::%uuid of player%})
+
+            CreatePage(player, "&6Search", "&7 ᴍᴏɴᴇʏ", {result::%uuid of player%::*}, {_page}, false, {sortMode::%uuid of player%})
+            play sound "minecraft:block.dispenser.dispense" with volume 1 to player
+
+function CreatePage(p: player, title: string, valName: string, list: objects, page: number, searchBtn: boolean, sortMode: string):
+    set {_start} to ({_page} - 1) * 45
+    set {_end} to {_start} + 44
+    set {_gui} to chest inventory with 6 rows named "%{_title}% - ᴘᴀɢᴇ %{_page}%"
+    set {_list::*} to applySearch({_p}, {_list::*})
+
+    set {_list::*} to applySort({_p}, {_list::*}, {_sortMode})
+    set {_lore::*} to split getSortLore({_sortMode}) at "||"
+    set slot 50 of {_gui} to hopper named "<#ff4fd8>Sort by" with lore {_lore::*} and "%nl% &f» &eᴄʟɪᴄᴋ ᴛᴏ sᴏʀᴛ" with custom model data 100005
+
+    loop {_list::*}:
+        set {_index} to (loop-index parsed as integer) - 1
+        if {_index} is between {_start} and {_end}:
+            
+            set {_players_uuid} to loop-value
+            set {_str} to {order::%uuid of {_p}%::%{_players_uuid}%::str}
+            set {_val} to {order::%uuid of {_p}%::%{_players_uuid}%::val}
+
+            set {_rank} to getRankColor(getPlayerRank({_p}, {_players_uuid}, {sortMode::%uuid of {_p}%}))
+            
+            set {_you} to " <#ffff40>(You)" if {_p} is player({_players_uuid}) else ""
+            set {_state} to "<#00ff40>● " if player({_players_uuid}) is online else "&7○ "
+            set {_myRank} to getRankColor(getPlayerRank({_p}, uuid of {_p}, {_sortMode}))
+            set slot ({_index} - {_start}) of {_gui} to {_str}'s skull named "%{_rank}%%{_state}%<#e8fff8>%{_str}%%{_you}%" with lore "%{_valName}%: <#00ff40>%{_val}%"
+    set slot 53 of {_gui} to arrow named "<#00ff6e>Next Page" with custom model data 100002 with lore " &f» <#ffff40>ᴄʟɪᴄᴋ ᴛᴏ ɢᴏ ғᴏʀᴡᴀʀᴅ" if size of {_list::*} > {_end}
+    set slot 45 of {_gui} to arrow named "<#ff002b>Previous Page" with custom model data 100001 with lore " &f» <#ffff40>ᴄʟɪᴄᴋ ᴛᴏ ɢᴏ ʙᴀᴄᴋ" if {_page} > 1
+    set slot 48 of {_gui} to anvil named "<#00bbff>Refresh" with lore " &f» &eᴄʟɪᴄᴋ ᴛᴏ ʀᴇғʀᴇsʜ" with custom model data 100000
+    set slot 52 of {_gui} to paper named "<#fcec03>Your rank" with lore " &f» %{_myRank}%" with custom model data 100006
+    if {_searchBtn} is true:
+        set slot 49 of {_gui} to oak sign named "<#ffbf00>Search" with custom model data 100003 with lore " &f» <#ffff40>ᴄʟɪᴄᴋ ᴛᴏ sᴇᴀʀᴄʜ" if size of {_list::*} > 15
+    else:
+        set slot 49 of {_gui} to barrier named "<#ff002b>Back" with custom model data 100004 with lore " &f» <#ffff40>ᴄʟɪᴄᴋ ᴛᴏ ɢᴏ ʙᴀᴄᴋ"
+    loop numbers from 45 to 53:
+        if slot loop-number of {_gui} is air:
+            set slot loop-number of {_gui} to gray stained glass pane named ""
+    open {_gui} to {_p}
+    if size of {_list::*} is 0:
+        send actionbar "&6No results found." to {_p}
+        play sound "minecraft:entity.villager.no" with volume 1 to {_p}
+
+function getPlayerRank(p: player, target: string, sortMode: string) :: number:
+    clear {_ranks::*}
+
+    set {_ranks::*} to {result::%uuid of {_p}%::*}
+
+    if {_sortMode} contains "poorest":
+        sort {_ranks::*} in ascending order by {order::%uuid of {_p}%::%input%::val}
+    else:
+        sort {_ranks::*} in descending order by {order::%uuid of {_p}%::%input%::val}
+
+    set {_i} to 0
+    loop {_ranks::*}:
+        add 1 to {_i}
+        if loop-value is {_target}:
+            return {_i}
+
+    return -1
+
+function getRankColor(rank: number) :: string:
+    set {_rankColor} to "<#d94302>&l%{_rank}%. "
+    if {_rank} is 1:
+        set {_rankColor} to "<#03fcdb>&l%{_rank}%. "
+    else if {_rank} is 2:
+        set {_rankColor} to "<#fffb12>&l%{_rank}%. "
+    else if {_rank} is 3:
+        set {_rankColor} to "<#ffffeb>&l%{_rank}%. "
+
+    return {_rankColor}
+
+function loadPlayers(p: player, title: text, SearchBtn: boolean):
+    clear {result::%uuid of {_p}%::*}
+    clear {order::%uuid of {_p}%::*}
+    if {_SearchBtn} is true:
+        clear {search::%uuid of {_p}%::*}
+
+    loop all offline players:
+        add uuid of loop-value to {result::%uuid of {_p}%::*}
+        set {order::%uuid of {_p}%::%uuid of loop-value%::val} to loop-value's balance
+        set {order::%uuid of {_p}%::%uuid of loop-value%::str} to loop-value
+    
+    CreatePage({_p}, {_title}, "&7 ᴍᴏɴᴇʏ", {result::%uuid of {_p}%::*}, 1, {_SearchBtn}, {sortMode::%uuid of {_p}%})
+
+function nextSortMode(mode: string) :: string:
+    if {_mode} is "richest":
+        return "poorest"
+    if {_mode} is "poorest":
+        return "richest-online"
+    if {_mode} is "richest-online":
+        return "poorest-online"
+    if {_mode} is "poorest-online":
+        return "richest-offline"
+    if {_mode} is "richest-offline":
+        return "poorest-offline"
+    return "richest"
+
+function applySearch(p: player, list: objects) :: objects:
+    if {search::%uuid of {_p}%::result} is not set:
+        return {_list::*}
+
+    clear {_temp::*}
+    loop {_list::*}:
+        if offlineplayer(loop-value)'s name contains {search::%uuid of {_p}%::result}:
+            add loop-value to {_temp::*}
+
+    return {_temp::*}
+
+function getSortLore(mode: string) :: text:
+    if {_mode} is "richest":
+        return " <#ff4fd8>» &fʀɪᴄʜᴇsᴛ ᴘʟᴀʏᴇʀs||   &7ᴘᴏᴏʀᴇsᴛ ᴘʟᴀʏᴇʀs||   &7ʀɪᴄʜᴇsᴛ ᴏɴʟɪɴᴇ ᴘʟᴀʏᴇʀs||   &7ᴘᴏᴏʀᴇsᴛ ᴏɴʟɪɴᴇ ᴘʟᴀʏᴇʀs||   &7ʀɪᴄʜᴇsᴛ ᴏғғʟɪɴᴇ ᴘʟᴀʏᴇʀs||   &7ᴘᴏᴏʀᴇsᴛ ᴏғғʟɪɴᴇ ᴘʟᴀʏᴇʀs"
+    if {_mode} is "poorest":
+        return "   &7ʀɪᴄʜᴇsᴛ ᴘʟᴀʏᴇʀs|| <#ff4fd8>» &fᴘᴏᴏʀᴇsᴛ ᴘʟᴀʏᴇʀs||   &7ʀɪᴄʜᴇsᴛ ᴏɴʟɪɴᴇ ᴘʟᴀʏᴇʀs||   &7ᴘᴏᴏʀᴇsᴛ ᴏɴʟɪɴᴇ ᴘʟᴀʏᴇʀs||   &7ʀɪᴄʜᴇsᴛ ᴏғғʟɪɴᴇ ᴘʟᴀʏᴇʀs||   &7ᴘᴏᴏʀᴇsᴛ ᴏғғʟɪɴᴇ ᴘʟᴀʏᴇʀs"
+    if {_mode} is "richest-online":
+        return "   &7ʀɪᴄʜᴇsᴛ ᴘʟᴀʏᴇʀs||   &7ᴘᴏᴏʀᴇsᴛ ᴘʟᴀʏᴇʀs|| <#ff4fd8>» &fʀɪᴄʜᴇsᴛ ᴏɴʟɪɴᴇ ᴘʟᴀʏᴇʀs||   &7ᴘᴏᴏʀᴇsᴛ ᴏɴʟɪɴᴇ ᴘʟᴀʏᴇʀs||   &7ʀɪᴄʜᴇsᴛ ᴏғғʟɪɴᴇ ᴘʟᴀʏᴇʀs||   &7ᴘᴏᴏʀᴇsᴛ ᴏғғʟɪɴᴇ ᴘʟᴀʏᴇʀs"
+    if {_mode} is "poorest-online":
+        return "   &7ʀɪᴄʜᴇsᴛ ᴘʟᴀʏᴇʀs||   &7ᴘᴏᴏʀᴇsᴛ ᴘʟᴀʏᴇʀs||   &7ʀɪᴄʜᴇsᴛ ᴏɴʟɪɴᴇ ᴘʟᴀʏᴇʀs|| <#ff4fd8>» &fᴘᴏᴏʀᴇsᴛ ᴏɴʟɪɴᴇ ᴘʟᴀʏᴇʀs||   &7ʀɪᴄʜᴇsᴛ ᴏғғʟɪɴᴇ ᴘʟᴀʏᴇrs||   &7ᴘᴏᴏʀᴇsᴛ ᴏғғʟɪɴᴇ ᴘʟᴀʏᴇrs"
+    if {_mode} is "richest-offline":
+        return "   &7ʀɪᴄʜᴇsᴛ ᴘʟᴀʏᴇʀs||   &7ᴘᴏᴏʀᴇsᴛ ᴘʟᴀʏᴇʀs||   &7ʀɪᴄʜᴇsᴛ ᴏɴʟɪɴᴇ ᴘʟᴀʏᴇʀs||   &7ᴘᴏᴏʀᴇsᴛ ᴏɴʟɪɴᴇ ᴘʟᴀʏᴇʀs|| <#ff4fd8>» &fʀɪᴄʜᴇsᴛ ᴏғғʟɪɴᴇ ᴘʟᴀʏᴇʀs||   &7ᴘᴏᴏʀᴇsᴛ ᴏғғʟɪɴᴇ ᴘʟᴀʏᴇrs"
+    return "   &7ʀɪᴄʜᴇsᴛ ᴘʟᴀʏᴇrs||   &7ᴘᴏᴏʀᴇsᴛ ᴘʟᴀʏᴇrs||   &7ʀɪᴄʜᴇsᴛ ᴏɴʟɪɴᴇ ᴘʟᴀʏᴇrs||   &7ᴘᴏᴏʀᴇsᴛ ᴏɴʟɪɴᴇ ᴘʟᴀʏᴇrs||   &7ʀɪᴄʜᴇsᴛ ᴏғғʟɪɴᴇ ᴘʟᴀʏᴇrs|| <#ff4fd8>» &fᴘᴏᴏʀᴇsᴛ ᴏғғʟɪɴᴇ ᴘʟᴀʏᴇʀs"
+
+function applySort(p: player, list: objects, mode: string) :: objects:
+    clear {_temp::*}
+
+    if {_mode} is "richest":
+        sort {_list::*} in descending order by {order::%uuid of {_p}%::%input%::val}
+        return {_list::*}
+
+    if {_mode} is "poorest":
+        sort {_list::*} in ascending order by {order::%uuid of {_p}%::%input%::val}
+        return {_list::*}
+
+    if {_mode} contains "online":
+        loop {_list::*}:
+            if player(loop-value) is online:
+                add loop-value to {_temp::*}
+    else if {_mode} contains "offline":
+        loop {_list::*}:
+            if player(loop-value) is not online:
+                add loop-value to {_temp::*}
+
+    if {_mode} contains "poorest":
+        sort {_temp::*} in ascending order by {order::%uuid of {_p}%::%input%::val}
+    else:
+        sort {_temp::*} in descending order by {order::%uuid of {_p}%::%input%::val}
+    return {_temp::*}
+
+on quit:
+    delete {result::%uuid of player%::*}
+    delete {order::%uuid of player%::*}
+    delete {search::%uuid of player%::*}

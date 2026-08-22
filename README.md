@@ -1,3 +1,3 @@
 # Top Balance
 ## About the Script
-TopBalance is a ranking script featuring 6 wealth filters: richest players, poorest players, richest online, poorest online, richest offline, and poorest offline. It provides complete economic oversight for admins and competitive insights for players in a clean UI.
+Curious who's loaded or totally broke? TopBalance shows the full wealth map with 6 smart filters: Richest & Poorest overall, online, and offline. No hassle—open it, see your exact rank in seconds, and know where you stand in a clear, simple UI.
